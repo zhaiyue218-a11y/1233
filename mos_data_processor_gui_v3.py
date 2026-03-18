@@ -387,16 +387,20 @@ class MOSDataProcessorV3:
             spine.set_color(COLORS['border'])
         
         self.ax.set_yscale('log')
-        self.ax.set_xlabel('V$_{GS}$ (V)', fontsize=10, fontweight='bold')
-        self.ax.set_ylabel('I$_{DS}$ (A)', fontsize=10, fontweight='bold')
+        self.ax.set_xlabel('V$_{GS}$ (V)', fontsize=10, fontweight='bold', labelpad=8)
+        self.ax.set_ylabel('I$_{DS}$ (A)', fontsize=10, fontweight='bold', labelpad=8)
         self.ax.grid(True, alpha=0.3, linestyle='--', color=COLORS['border'])
+        
+        # 确保X轴刻度可见
+        self.ax.tick_params(axis='x', labelbottom=True, labelsize=9, rotation=45)
         
         # 添加初始提示文字
         self.ax.text(0.5, 0.5, '请选择文件并点击"处理数据"\n以显示转移特性曲线',
                     transform=self.ax.transAxes, ha='center', va='center',
                     fontsize=11, color=COLORS['text_secondary'])
         
-        self.fig.tight_layout(pad=1.5)
+        # 调整布局 - 增加底部边距
+        self.fig.tight_layout(pad=2.0, rect=[0, 0.05, 1, 0.95])
         self.canvas.draw()
     
     def select_file(self):
@@ -481,17 +485,20 @@ class MOSDataProcessorV3:
                 spine.set_color(COLORS['border'])
             
             self.ax.grid(True, linestyle='--', alpha=0.3, color=COLORS['border'])
-            self.ax.set_xlabel('V$_{GS}$ (V)', fontsize=10, fontweight='bold')
-            self.ax.set_ylabel('I$_{DS}$ (A)', fontsize=10, fontweight='bold')
+            self.ax.set_xlabel('V$_{GS}$ (V)', fontsize=10, fontweight='bold', labelpad=8)
+            self.ax.set_ylabel('I$_{DS}$ (A)', fontsize=10, fontweight='bold', labelpad=8)
             self.ax.set_yscale('log')
+            
+            # 确保X轴刻度可见
+            self.ax.tick_params(axis='x', labelbottom=True, labelsize=9, rotation=45)
             
             # 绘制曲线
             self.ax.plot(vg, np.abs(id_raw), color=COLORS['primary'], 
                         linewidth=2, marker='o', markersize=2, alpha=0.8)
             self.ax.set_title('MOS转移特性曲线', fontsize=12, fontweight='bold', pad=10)
             
-            # 调整布局
-            self.fig.tight_layout(pad=1.5)
+            # 调整布局 - 增加底部边距
+            self.fig.tight_layout(pad=2.0, rect=[0, 0.05, 1, 0.95])
             
             # 强制刷新画布
             self.canvas.draw()
