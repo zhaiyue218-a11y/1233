@@ -51,17 +51,12 @@ class MOSDataProcessorV2:
     
     def create_widgets(self):
         # 创建主框架
-        main_frame = tk.Frame(self.root, bg=COLORS['bg_light'], padx=15, pady=15)
+        main_frame = tk.Frame(self.root, bg=COLORS['bg_light'])
         main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # 配置主框架的行和列权重
-        main_frame.grid_rowconfigure(1, weight=1)
-        main_frame.grid_rowconfigure(2, weight=2)
-        main_frame.grid_columnconfigure(0, weight=1)
         
         # ========== 顶部标题栏 ==========
         header_frame = tk.Frame(main_frame, bg=COLORS['bg_dark'], height=50)
-        header_frame.grid(row=0, column=0, sticky="ew", pady=15)
+        header_frame.pack(fill=tk.X, padx=15, pady=15)
         header_frame.pack_propagate(False)
         
         tk.Label(header_frame, text="◈ 半导体测试数据处理工具", 
@@ -75,7 +70,7 @@ class MOSDataProcessorV2:
         # ========== 工具栏 ==========
         toolbar_frame = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                                 highlightthickness=1)
-        toolbar_frame.grid(row=1, column=0, sticky="ew", pady=15)
+        toolbar_frame.pack(fill=tk.X, padx=15, pady=5)
         
         # 文件信息
         file_info_frame = tk.Frame(toolbar_frame, bg='white', padx=15, pady=12)
@@ -111,15 +106,18 @@ class MOSDataProcessorV2:
         
         # ========== 中间内容区域 ==========
         content_frame = tk.Frame(main_frame, bg=COLORS['bg_light'])
-        content_frame.grid(row=2, column=0, sticky="nsew")
-        content_frame.grid_columnconfigure(0, weight=3)
-        content_frame.grid_columnconfigure(1, weight=2)
-        content_frame.grid_rowconfigure(0, weight=1)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
+        
+        # 使用左右分割
+        content_frame.pack(fill=tk.BOTH, expand=True)
         
         # 左侧：数据预览
-        preview_card = tk.Frame(content_frame, bg='white', highlightbackground=COLORS['border'],
+        left_frame = tk.Frame(content_frame, bg=COLORS['bg_light'])
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        preview_card = tk.Frame(left_frame, bg='white', highlightbackground=COLORS['border'],
                                highlightthickness=1)
-        preview_card.grid(row=0, column=0, sticky="nsew", padx=10)
+        preview_card.pack(fill=tk.BOTH, expand=True)
         
         # 卡片标题
         preview_header = tk.Frame(preview_card, bg='white', padx=15, pady=12)
@@ -142,7 +140,7 @@ class MOSDataProcessorV2:
         
         # 右侧：参数区域
         right_frame = tk.Frame(content_frame, bg=COLORS['bg_light'])
-        right_frame.grid(row=0, column=1, sticky="nsew")
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, padx=5)
         
         # 器件参数卡片
         param_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
@@ -227,7 +225,7 @@ class MOSDataProcessorV2:
         # ========== 底部图表区域 ==========
         plot_card = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                             highlightthickness=1)
-        plot_card.grid(row=3, column=0, sticky="nsew", pady=10)
+        plot_card.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
         
         plot_header = tk.Frame(plot_card, bg='white', padx=15, pady=12)
         plot_header.pack(fill=tk.X)
@@ -239,22 +237,20 @@ class MOSDataProcessorV2:
         # 图表区域
         plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=15)
         plot_frame.pack(fill=tk.BOTH, expand=True)
-        plot_frame.grid_rowconfigure(0, weight=1)
-        plot_frame.grid_columnconfigure(0, weight=1)
         
         # 创建图形
         self.fig = plt.Figure(figsize=(10, 5), dpi=100)
         self.ax = self.fig.add_subplot(111)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
-        self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # 初始化图表样式
         self._setup_chart_style()
         
         # ========== 状态栏 ==========
         status_frame = tk.Frame(main_frame, bg='white', height=30)
-        status_frame.grid(row=4, column=0, sticky="ew")
+        status_frame.pack(fill=tk.X, padx=15)
         status_frame.pack_propagate(False)
         
         # 状态指示器
