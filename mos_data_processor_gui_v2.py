@@ -104,41 +104,9 @@ class MOSDataProcessorV2:
                           activebackground=self._darken_color(color))
             btn.pack(side=tk.LEFT, padx=3)
         
-        # ========== 中间内容区域 - 使用PanedWindow ==========
-        content_paned = tk.PanedWindow(main_frame, orient=tk.HORIZONTAL, bg=COLORS['bg_light'],
-                                       sashwidth=5, sashrelief=tk.RAISED)
-        content_paned.pack(fill=tk.BOTH, expand=True, pady=5)
-        
-        # 左侧：数据预览 (占60%宽度)
-        left_frame = tk.Frame(content_paned, bg=COLORS['bg_light'], width=600)
-        content_paned.add(left_frame, minsize=400, stretch="always")
-        
-        preview_card = tk.Frame(left_frame, bg='white', highlightbackground=COLORS['border'],
-                               highlightthickness=1)
-        preview_card.pack(fill=tk.BOTH, expand=True)
-        
-        # 卡片标题
-        preview_header = tk.Frame(preview_card, bg='white', padx=12, pady=10)
-        preview_header.pack(fill=tk.X)
-        
-        tk.Frame(preview_header, bg=COLORS['primary'], width=4, height=18).pack(side=tk.LEFT, padx=8)
-        tk.Label(preview_header, text="数据预览", font=('Microsoft YaHei', 12, 'bold'),
-                bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
-        
-        # 表格区域
-        table_frame = tk.Frame(preview_card, bg='white', padx=12, pady=12)
-        table_frame.pack(fill=tk.BOTH, expand=True)
-        
-        self.tree = ttk.Treeview(table_frame, height=10)
-        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        tree_scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
-        tree_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.tree.configure(yscrollcommand=tree_scrollbar.set)
-        
-        # 右侧：参数区域 (占40%宽度，最小380px)
-        right_frame = tk.Frame(content_paned, bg=COLORS['bg_light'], width=380)
-        content_paned.add(right_frame, minsize=380, stretch="never")
+        # ========== 中间内容区域 - 仅参数区域 ==========
+        right_frame = tk.Frame(main_frame, bg=COLORS['bg_light'])
+        right_frame.pack(fill=tk.BOTH, expand=True, pady=5)
         
         # 器件参数卡片
         param_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
@@ -366,20 +334,6 @@ class MOSDataProcessorV2:
             vg = self.data.iloc[:, 0]
             id_raw = self.data.iloc[:, 1]
             
-            # 更新表格
-            self.tree.delete(*self.tree.get_children())
-            self.tree['columns'] = ('Vg', 'Id')
-            self.tree.heading('Vg', text='Vg (V)')
-            self.tree.heading('Id', text='Id (A)')
-            self.tree.column('Vg', width=150, anchor='center')
-            self.tree.column('Id', width=150, anchor='center')
-            
-            for i in range(min(len(vg), 50)):
-                self.tree.insert('', 'end', values=(
-                    f'{vg.iloc[i]:.4f}',
-                    f'{id_raw.iloc[i]:.4e}'
-                ))
-            
             self._set_status(f'已加载 {len(vg)} 个数据点', 'ready')
             return True
             
@@ -421,20 +375,34 @@ class MOSDataProcessorV2:
     
     def plot_curve(self, vg, id_raw):
         try:
-            # 清除坐标轴但保持图形设置
+            # 清除坐标轴
             self.ax.clear()
-            self._setup_chart_style()
+            
+            # 重新设置图表样式
+            self.ax.set_facecolor('white')
+            self.ax.tick_params(axis='both', direction='in', length=6, width=1.5)
+            
+            for spine in self.ax.spines.values():
+                spine.set_linewidth(1.5)
+                spine.set_color('#E2E8F0')
+            
+            self.ax.grid(True, linestyle='--', alpha=0.3, color='#94A3B8')
+            self.ax.set_xlabel('Vgs (V)', fontsize=11, fontweight='bold')
+            self.ax.set_ylabel('Ids (A)', fontsize=11, fontweight='bold')
             
             # 绘制曲线
-            self.ax.plot(vg, np.abs(id_raw), color=COLORS['primary'], linewidth=2.5)
+            self.ax.plot(vg, np.abs(id_raw), color=COLORS['primary'], linewidth=2.5, marker='o', markersize=3)
             self.ax.set_title('MOS转移特性曲线', fontsize=13, fontweight='bold', pad=15)
             
             # 使用更安全的布局方式
             self.fig.tight_layout(pad=2.0)
             
-            # 安全地刷新画布
-            self.canvas.draw_idle()
+            # 强制刷新画布
+            self.canvas.draw()
             self.canvas.flush_events()
+            
+            # 更新状态
+            self.root.update_idletasks()
         except Exception as e:
             messagebox.showerror("错误", f"绘图时出错: {e}")
     
