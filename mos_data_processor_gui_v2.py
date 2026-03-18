@@ -61,7 +61,7 @@ class MOSDataProcessorV2:
         
         # ========== 顶部标题栏 ==========
         header_frame = tk.Frame(main_frame, bg=COLORS['bg_dark'], height=50)
-        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 15))
+        header_frame.grid(row=0, column=0, sticky="ew", pady=15)
         header_frame.pack_propagate(False)
         
         tk.Label(header_frame, text="◈ 半导体测试数据处理工具", 
@@ -70,12 +70,12 @@ class MOSDataProcessorV2:
         
         tk.Label(header_frame, text="MOS特性分析", 
                 font=('Microsoft YaHei', 11),
-                bg=COLORS['bg_dark'], fg='#94A3B8').pack(side=tk.LEFT, padx=(0, 15), pady=10)
+                bg=COLORS['bg_dark'], fg='#94A3B8').pack(side=tk.LEFT, padx=15, pady=10)
         
         # ========== 工具栏 ==========
         toolbar_frame = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                                 highlightthickness=1)
-        toolbar_frame.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+        toolbar_frame.grid(row=1, column=0, sticky="ew", pady=15)
         
         # 文件信息
         file_info_frame = tk.Frame(toolbar_frame, bg='white', padx=15, pady=12)
@@ -87,7 +87,7 @@ class MOSDataProcessorV2:
         self.file_label = tk.Label(file_info_frame, text="未选择文件", 
                                   font=('Microsoft YaHei', 10, 'bold'),
                                   bg='white', fg=COLORS['text_primary'])
-        self.file_label.pack(side=tk.LEFT, padx=(10, 0))
+        self.file_label.pack(side=tk.LEFT, padx=10)
         
         # 按钮组
         btn_frame = tk.Frame(toolbar_frame, bg='white', padx=10, pady=8)
@@ -119,18 +119,18 @@ class MOSDataProcessorV2:
         # 左侧：数据预览
         preview_card = tk.Frame(content_frame, bg='white', highlightbackground=COLORS['border'],
                                highlightthickness=1)
-        preview_card.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+        preview_card.grid(row=0, column=0, sticky="nsew", padx=10)
         
         # 卡片标题
         preview_header = tk.Frame(preview_card, bg='white', padx=15, pady=12)
         preview_header.pack(fill=tk.X)
         
-        tk.Frame(preview_header, bg=COLORS['primary'], width=4, height=20).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Frame(preview_header, bg=COLORS['primary'], width=4, height=20).pack(side=tk.LEFT, padx=10)
         tk.Label(preview_header, text="数据预览", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         # 表格区域
-        table_frame = tk.Frame(preview_card, bg='white', padx=15, pady=(0, 15))
+        table_frame = tk.Frame(preview_card, bg='white', padx=15, pady=15)
         table_frame.pack(fill=tk.BOTH, expand=True)
         
         self.tree = ttk.Treeview(table_frame, height=12)
@@ -147,16 +147,16 @@ class MOSDataProcessorV2:
         # 器件参数卡片
         param_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
                              highlightthickness=1)
-        param_card.pack(fill=tk.X, pady=(0, 10))
+        param_card.pack(fill=tk.X, pady=10)
         
         param_header = tk.Frame(param_card, bg='white', padx=15, pady=12)
         param_header.pack(fill=tk.X)
         
-        tk.Frame(param_header, bg=COLORS['secondary'], width=4, height=20).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Frame(param_header, bg=COLORS['secondary'], width=4, height=20).pack(side=tk.LEFT, padx=10)
         tk.Label(param_header, text="器件参数", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
-        param_content = tk.Frame(param_card, bg='white', padx=15, pady=(0, 15))
+        param_content = tk.Frame(param_card, bg='white', padx=15, pady=15)
         param_content.pack(fill=tk.X)
         
         # 参数输入
@@ -177,7 +177,7 @@ class MOSDataProcessorV2:
                            relief='solid', bd=1, highlightthickness=1,
                            highlightcolor=COLORS['primary'])
             entry.insert(0, str(default))
-            entry.pack(side=tk.LEFT, padx=(0, 5))
+            entry.pack(side=tk.LEFT, padx=5)
             setattr(self, attr, entry)
             
             tk.Label(row, text=unit, font=('Microsoft YaHei', 9),
@@ -188,7 +188,7 @@ class MOSDataProcessorV2:
                             bg=COLORS['primary'], fg='white', font=('Microsoft YaHei', 10, 'bold'),
                             relief='flat', padx=20, pady=8, cursor='hand2',
                             activebackground=COLORS['primary_hover'])
-        calc_btn.pack(pady=(15, 0))
+        calc_btn.pack(pady=15)
         
         # 计算结果卡片
         result_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
@@ -198,7 +198,7 @@ class MOSDataProcessorV2:
         result_header = tk.Frame(result_card, bg='white', padx=15, pady=12)
         result_header.pack(fill=tk.X)
         
-        tk.Frame(result_header, bg=COLORS['warning'], width=4, height=20).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Frame(result_header, bg=COLORS['warning'], width=4, height=20).pack(side=tk.LEFT, padx=10)
         tk.Label(result_header, text="电学性能参数", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
@@ -227,17 +227,17 @@ class MOSDataProcessorV2:
         # ========== 底部图表区域 ==========
         plot_card = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                             highlightthickness=1)
-        plot_card.grid(row=3, column=0, sticky="nsew", pady=(0, 10))
+        plot_card.grid(row=3, column=0, sticky="nsew", pady=10)
         
         plot_header = tk.Frame(plot_card, bg='white', padx=15, pady=12)
         plot_header.pack(fill=tk.X)
         
-        tk.Frame(plot_header, bg=COLORS['danger'], width=4, height=20).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Frame(plot_header, bg=COLORS['danger'], width=4, height=20).pack(side=tk.LEFT, padx=10)
         tk.Label(plot_header, text="转移特性曲线", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         # 图表区域
-        plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=(0, 15))
+        plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=15)
         plot_frame.pack(fill=tk.BOTH, expand=True)
         plot_frame.grid_rowconfigure(0, weight=1)
         plot_frame.grid_columnconfigure(0, weight=1)
@@ -260,7 +260,7 @@ class MOSDataProcessorV2:
         # 状态指示器
         self.status_indicator = tk.Canvas(status_frame, width=10, height=10, 
                                          bg='white', highlightthickness=0)
-        self.status_indicator.pack(side=tk.LEFT, padx=(15, 5))
+        self.status_indicator.pack(side=tk.LEFT, padx=15)
         self._draw_status_circle('ready')
         
         self.status_var = tk.StringVar(value="就绪")
@@ -291,13 +291,13 @@ class MOSDataProcessorV2:
                 bg='white', fg=COLORS['text_secondary']).pack(anchor='w')
         
         value_frame = tk.Frame(content, bg='white')
-        value_frame.pack(fill=tk.X, pady=(3, 0))
+        value_frame.pack(fill=tk.X, pady=3)
         
         tk.Label(value_frame, textvariable=value_var, font=('Microsoft YaHei', 16, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         tk.Label(value_frame, text=f" {unit}", font=('Microsoft YaHei', 9),
-                bg='white', fg=COLORS['text_secondary']).pack(side=tk.LEFT, pady=(5, 0))
+                bg='white', fg=COLORS['text_secondary']).pack(side=tk.LEFT, pady=5)
     
     def _draw_status_circle(self, status):
         """绘制状态指示器"""
