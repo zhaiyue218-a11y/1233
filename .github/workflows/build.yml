@@ -3,38 +3,37 @@ name: Build EXE
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
     runs-on: windows-latest
-    
+
     steps:
-    # 检出代码
+    # 检出代码 (升级到 v4)
     - name: Checkout code
-      uses: actions/checkout@v3
-    
-    # 设置 Python 环境
+      uses: actions/checkout@v4
+
+    # 设置 Python 环境 (升级到 v5)
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    
+
     # 安装依赖
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller pandas numpy matplotlib
-    
+
     # 构建 EXE
     - name: Build EXE
       run: |
         pyinstaller --onefile --windowed --name "MOS_Data_Processor_GUI" mos_data_processor_gui_v2.py
-    
-    # 上传构建产物
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
+
+    # 上传打包好的 EXE (升级到 v4，解决报错的核心)
+    - name: Upload EXE
+      uses: actions/upload-artifact@v4
       with:
         name: MOS_Data_Processor_GUI
-        path: dist/
-        retention-days: 30
+        path: dist/MOS_Data_Processor_GUI.exe
