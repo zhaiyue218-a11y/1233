@@ -50,31 +50,13 @@ class MOSDataProcessorV2:
         self.create_widgets()
     
     def create_widgets(self):
-        # 创建主框架 - 使用Canvas支持滚动
-        self.main_canvas = tk.Canvas(self.root, bg=COLORS['bg_light'], highlightthickness=0)
-        self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # 添加滚动条
-        scrollbar = ttk.Scrollbar(self.root, orient=tk.VERTICAL, command=self.main_canvas.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.main_canvas.configure(yscrollcommand=scrollbar.set)
-        
-        # 创建可滚动的主框架
-        main_frame = tk.Frame(self.main_canvas, bg=COLORS['bg_light'])
-        self.canvas_window = self.main_canvas.create_window((0, 0), window=main_frame, anchor='nw', width=1400)
-        
-        # 绑定滚动事件
-        def configure_canvas(event):
-            self.main_canvas.configure(scrollregion=self.main_canvas.bbox('all'))
-            # 确保窗口宽度适应
-            self.main_canvas.itemconfig(self.canvas_window, width=event.width)
-        
-        main_frame.bind('<Configure>', configure_canvas)
-        self.main_canvas.bind('<Configure>', lambda e: self.main_canvas.itemconfig(self.canvas_window, width=e.width))
+        # 创建主框架 - 使用PanedWindow实现可调整的分割
+        main_frame = tk.Frame(self.root, bg=COLORS['bg_light'])
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # ========== 顶部标题栏 ==========
         header_frame = tk.Frame(main_frame, bg=COLORS['bg_dark'], height=50)
-        header_frame.pack(fill=tk.X, padx=15, pady=15)
+        header_frame.pack(fill=tk.X, pady=5)
         header_frame.pack_propagate(False)
         
         tk.Label(header_frame, text="◈ 半导体测试数据处理工具", 
@@ -88,10 +70,10 @@ class MOSDataProcessorV2:
         # ========== 工具栏 ==========
         toolbar_frame = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                                 highlightthickness=1)
-        toolbar_frame.pack(fill=tk.X, padx=15, pady=5)
+        toolbar_frame.pack(fill=tk.X, pady=5)
         
         # 文件信息
-        file_info_frame = tk.Frame(toolbar_frame, bg='white', padx=15, pady=12)
+        file_info_frame = tk.Frame(toolbar_frame, bg='white', padx=15, pady=10)
         file_info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         tk.Label(file_info_frame, text="当前文件:", font=('Microsoft YaHei', 10),
@@ -103,7 +85,7 @@ class MOSDataProcessorV2:
         self.file_label.pack(side=tk.LEFT, padx=10)
         
         # 按钮组
-        btn_frame = tk.Frame(toolbar_frame, bg='white', padx=10, pady=8)
+        btn_frame = tk.Frame(toolbar_frame, bg='white', padx=10, pady=6)
         btn_frame.pack(side=tk.RIGHT)
         
         # 创建样式化的按钮
@@ -118,60 +100,59 @@ class MOSDataProcessorV2:
         for text, cmd, color in buttons:
             btn = tk.Button(btn_frame, text=text, command=cmd,
                           bg=color, fg='white', font=('Microsoft YaHei', 9, 'bold'),
-                          relief='flat', padx=15, pady=6, cursor='hand2',
+                          relief='flat', padx=12, pady=5, cursor='hand2',
                           activebackground=self._darken_color(color))
-            btn.pack(side=tk.LEFT, padx=4)
+            btn.pack(side=tk.LEFT, padx=3)
         
-        # ========== 中间内容区域 ==========
-        content_frame = tk.Frame(main_frame, bg=COLORS['bg_light'])
-        content_frame.pack(fill=tk.X, padx=15, pady=5)
+        # ========== 中间内容区域 - 使用PanedWindow ==========
+        content_paned = tk.PanedWindow(main_frame, orient=tk.HORIZONTAL, bg=COLORS['bg_light'],
+                                       sashwidth=5, sashrelief=tk.RAISED)
+        content_paned.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        # 使用左右分割
-        # 左侧：数据预览
-        left_frame = tk.Frame(content_frame, bg=COLORS['bg_light'])
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        # 左侧：数据预览 (占60%宽度)
+        left_frame = tk.Frame(content_paned, bg=COLORS['bg_light'], width=600)
+        content_paned.add(left_frame, minsize=400, stretch="always")
         
         preview_card = tk.Frame(left_frame, bg='white', highlightbackground=COLORS['border'],
                                highlightthickness=1)
         preview_card.pack(fill=tk.BOTH, expand=True)
         
         # 卡片标题
-        preview_header = tk.Frame(preview_card, bg='white', padx=15, pady=12)
+        preview_header = tk.Frame(preview_card, bg='white', padx=12, pady=10)
         preview_header.pack(fill=tk.X)
         
-        tk.Frame(preview_header, bg=COLORS['primary'], width=4, height=20).pack(side=tk.LEFT, padx=10)
+        tk.Frame(preview_header, bg=COLORS['primary'], width=4, height=18).pack(side=tk.LEFT, padx=8)
         tk.Label(preview_header, text="数据预览", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         # 表格区域
-        table_frame = tk.Frame(preview_card, bg='white', padx=15, pady=15)
+        table_frame = tk.Frame(preview_card, bg='white', padx=12, pady=12)
         table_frame.pack(fill=tk.BOTH, expand=True)
         
-        self.tree = ttk.Treeview(table_frame, height=12)
+        self.tree = ttk.Treeview(table_frame, height=10)
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         tree_scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
         tree_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree.configure(yscrollcommand=tree_scrollbar.set)
         
-        # 右侧：参数区域
-        right_frame = tk.Frame(content_frame, bg=COLORS['bg_light'], width=350)
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
-        right_frame.pack_propagate(False)
+        # 右侧：参数区域 (占40%宽度，最小380px)
+        right_frame = tk.Frame(content_paned, bg=COLORS['bg_light'], width=380)
+        content_paned.add(right_frame, minsize=380, stretch="never")
         
         # 器件参数卡片
         param_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
                              highlightthickness=1)
-        param_card.pack(fill=tk.X, pady=10)
+        param_card.pack(fill=tk.X, pady=5)
         
-        param_header = tk.Frame(param_card, bg='white', padx=15, pady=12)
+        param_header = tk.Frame(param_card, bg='white', padx=12, pady=10)
         param_header.pack(fill=tk.X)
         
-        tk.Frame(param_header, bg=COLORS['secondary'], width=4, height=20).pack(side=tk.LEFT, padx=10)
+        tk.Frame(param_header, bg=COLORS['secondary'], width=4, height=18).pack(side=tk.LEFT, padx=8)
         tk.Label(param_header, text="器件参数", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
-        param_content = tk.Frame(param_card, bg='white', padx=15, pady=15)
+        param_content = tk.Frame(param_card, bg='white', padx=12, pady=12)
         param_content.pack(fill=tk.X)
         
         # 参数输入
@@ -183,16 +164,16 @@ class MOSDataProcessorV2:
         
         for i, (label, unit, attr, default) in enumerate(params):
             row = tk.Frame(param_content, bg='white')
-            row.pack(fill=tk.X, pady=5)
+            row.pack(fill=tk.X, pady=4)
             
             tk.Label(row, text=f"{label}:", font=('Microsoft YaHei', 10),
-                    bg='white', fg=COLORS['text_primary'], width=12, anchor='w').pack(side=tk.LEFT)
+                    bg='white', fg=COLORS['text_primary'], width=11, anchor='w').pack(side=tk.LEFT)
             
-            entry = tk.Entry(row, font=('Microsoft YaHei', 10), width=12,
+            entry = tk.Entry(row, font=('Microsoft YaHei', 10), width=10,
                            relief='solid', bd=1, highlightthickness=1,
                            highlightcolor=COLORS['primary'])
             entry.insert(0, str(default))
-            entry.pack(side=tk.LEFT, padx=5)
+            entry.pack(side=tk.LEFT, padx=4)
             setattr(self, attr, entry)
             
             tk.Label(row, text=unit, font=('Microsoft YaHei', 9),
@@ -201,24 +182,39 @@ class MOSDataProcessorV2:
         # 计算按钮
         calc_btn = tk.Button(param_content, text="计算电学性能", command=self.calculate_parameters,
                             bg=COLORS['primary'], fg='white', font=('Microsoft YaHei', 10, 'bold'),
-                            relief='flat', padx=20, pady=8, cursor='hand2',
+                            relief='flat', padx=15, pady=6, cursor='hand2',
                             activebackground=COLORS['primary_hover'])
-        calc_btn.pack(pady=15)
+        calc_btn.pack(pady=12)
         
-        # 计算结果卡片
+        # 计算结果卡片 - 使用固定高度确保显示
         result_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
-                              highlightthickness=1)
-        result_card.pack(fill=tk.BOTH, expand=True)
+                              highlightthickness=1, height=280)
+        result_card.pack(fill=tk.X, pady=5)
+        result_card.pack_propagate(False)
         
-        result_header = tk.Frame(result_card, bg='white', padx=15, pady=12)
+        result_header = tk.Frame(result_card, bg='white', padx=12, pady=10)
         result_header.pack(fill=tk.X)
         
-        tk.Frame(result_header, bg=COLORS['warning'], width=4, height=20).pack(side=tk.LEFT, padx=10)
+        tk.Frame(result_header, bg=COLORS['warning'], width=4, height=18).pack(side=tk.LEFT, padx=8)
         tk.Label(result_header, text="电学性能参数", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
-        result_content = tk.Frame(result_card, bg='white', padx=10, pady=10)
-        result_content.pack(fill=tk.BOTH, expand=True)
+        # 创建带滚动条的结果区域
+        result_container = tk.Frame(result_card, bg='white')
+        result_container.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        
+        result_canvas = tk.Canvas(result_container, bg='white', highlightthickness=0)
+        result_scrollbar = ttk.Scrollbar(result_container, orient=tk.VERTICAL, command=result_canvas.yview)
+        result_content = tk.Frame(result_canvas, bg='white')
+        
+        result_canvas.configure(yscrollcommand=result_scrollbar.set)
+        result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        result_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        result_canvas.create_window((0, 0), window=result_content, anchor='nw', width=340)
+        
+        def configure_result_canvas(event):
+            result_canvas.configure(scrollregion=result_canvas.bbox('all'))
+        result_content.bind('<Configure>', configure_result_canvas)
         
         # 创建结果变量
         self.vth_var = tk.StringVar(value="--")
@@ -241,23 +237,23 @@ class MOSDataProcessorV2:
         
         # ========== 底部图表区域 ==========
         plot_card = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
-                            highlightthickness=1)
-        plot_card.pack(fill=tk.X, padx=15, pady=10)
+                            highlightthickness=1, height=320)
+        plot_card.pack(fill=tk.X, pady=5)
+        plot_card.pack_propagate(False)
         
-        plot_header = tk.Frame(plot_card, bg='white', padx=15, pady=12)
+        plot_header = tk.Frame(plot_card, bg='white', padx=12, pady=10)
         plot_header.pack(fill=tk.X)
         
-        tk.Frame(plot_header, bg=COLORS['danger'], width=4, height=20).pack(side=tk.LEFT, padx=10)
+        tk.Frame(plot_header, bg=COLORS['danger'], width=4, height=18).pack(side=tk.LEFT, padx=8)
         tk.Label(plot_header, text="转移特性曲线", font=('Microsoft YaHei', 12, 'bold'),
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         # 图表区域
-        plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=15, height=400)
-        plot_frame.pack(fill=tk.X)
-        plot_frame.pack_propagate(False)
+        plot_frame = tk.Frame(plot_card, bg='white', padx=12, pady=12)
+        plot_frame.pack(fill=tk.BOTH, expand=True)
         
-        # 创建图形
-        self.fig = plt.Figure(figsize=(10, 4), dpi=100)
+        # 创建图形 - 使用响应式尺寸
+        self.fig = plt.Figure(figsize=(8, 3.5), dpi=100)
         self.ax = self.fig.add_subplot(111)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
@@ -267,14 +263,14 @@ class MOSDataProcessorV2:
         self._setup_chart_style()
         
         # ========== 状态栏 ==========
-        status_frame = tk.Frame(main_frame, bg='white', height=30)
-        status_frame.pack(fill=tk.X, padx=15, pady=5)
+        status_frame = tk.Frame(main_frame, bg='white', height=28)
+        status_frame.pack(fill=tk.X, pady=5)
         status_frame.pack_propagate(False)
         
         # 状态指示器
         self.status_indicator = tk.Canvas(status_frame, width=10, height=10, 
                                          bg='white', highlightthickness=0)
-        self.status_indicator.pack(side=tk.LEFT, padx=15)
+        self.status_indicator.pack(side=tk.LEFT, padx=12)
         self._draw_status_circle('ready')
         
         self.status_var = tk.StringVar(value="就绪")
