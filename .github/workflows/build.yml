@@ -29,7 +29,7 @@ jobs:
     # 构建 EXE
     - name: Build EXE
       run: |
-        pyinstaller --onefile --windowed --name "MOS_Data_Processor_GUI" mos_data_processor_gui_v2.py
+        pyinstaller --onefile --windowed --name "MOS_Data_Processor_GUI" mos_data_processor_gui_v3.py
 
     # 上传打包好的 EXE (升级到 v4，解决报错的核心)
     - name: Upload EXE
