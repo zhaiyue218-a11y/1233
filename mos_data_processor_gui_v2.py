@@ -50,9 +50,27 @@ class MOSDataProcessorV2:
         self.create_widgets()
     
     def create_widgets(self):
-        # 创建主框架
-        main_frame = tk.Frame(self.root, bg=COLORS['bg_light'])
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        # 创建主框架 - 使用Canvas支持滚动
+        self.main_canvas = tk.Canvas(self.root, bg=COLORS['bg_light'], highlightthickness=0)
+        self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # 添加滚动条
+        scrollbar = ttk.Scrollbar(self.root, orient=tk.VERTICAL, command=self.main_canvas.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.main_canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # 创建可滚动的主框架
+        main_frame = tk.Frame(self.main_canvas, bg=COLORS['bg_light'])
+        self.canvas_window = self.main_canvas.create_window((0, 0), window=main_frame, anchor='nw', width=1400)
+        
+        # 绑定滚动事件
+        def configure_canvas(event):
+            self.main_canvas.configure(scrollregion=self.main_canvas.bbox('all'))
+            # 确保窗口宽度适应
+            self.main_canvas.itemconfig(self.canvas_window, width=event.width)
+        
+        main_frame.bind('<Configure>', configure_canvas)
+        self.main_canvas.bind('<Configure>', lambda e: self.main_canvas.itemconfig(self.canvas_window, width=e.width))
         
         # ========== 顶部标题栏 ==========
         header_frame = tk.Frame(main_frame, bg=COLORS['bg_dark'], height=50)
@@ -106,11 +124,9 @@ class MOSDataProcessorV2:
         
         # ========== 中间内容区域 ==========
         content_frame = tk.Frame(main_frame, bg=COLORS['bg_light'])
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
+        content_frame.pack(fill=tk.X, padx=15, pady=5)
         
         # 使用左右分割
-        content_frame.pack(fill=tk.BOTH, expand=True)
-        
         # 左侧：数据预览
         left_frame = tk.Frame(content_frame, bg=COLORS['bg_light'])
         left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
@@ -134,13 +150,14 @@ class MOSDataProcessorV2:
         self.tree = ttk.Treeview(table_frame, height=12)
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.tree.configure(yscrollcommand=scrollbar.set)
+        tree_scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        tree_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
         
         # 右侧：参数区域
-        right_frame = tk.Frame(content_frame, bg=COLORS['bg_light'])
-        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, padx=5)
+        right_frame = tk.Frame(content_frame, bg=COLORS['bg_light'], width=350)
+        right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+        right_frame.pack_propagate(False)
         
         # 器件参数卡片
         param_card = tk.Frame(right_frame, bg='white', highlightbackground=COLORS['border'],
@@ -225,7 +242,7 @@ class MOSDataProcessorV2:
         # ========== 底部图表区域 ==========
         plot_card = tk.Frame(main_frame, bg='white', highlightbackground=COLORS['border'],
                             highlightthickness=1)
-        plot_card.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
+        plot_card.pack(fill=tk.X, padx=15, pady=10)
         
         plot_header = tk.Frame(plot_card, bg='white', padx=15, pady=12)
         plot_header.pack(fill=tk.X)
@@ -235,11 +252,12 @@ class MOSDataProcessorV2:
                 bg='white', fg=COLORS['text_primary']).pack(side=tk.LEFT)
         
         # 图表区域
-        plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=15)
-        plot_frame.pack(fill=tk.BOTH, expand=True)
+        plot_frame = tk.Frame(plot_card, bg='white', padx=15, pady=15, height=400)
+        plot_frame.pack(fill=tk.X)
+        plot_frame.pack_propagate(False)
         
         # 创建图形
-        self.fig = plt.Figure(figsize=(10, 5), dpi=100)
+        self.fig = plt.Figure(figsize=(10, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
@@ -250,7 +268,7 @@ class MOSDataProcessorV2:
         
         # ========== 状态栏 ==========
         status_frame = tk.Frame(main_frame, bg='white', height=30)
-        status_frame.pack(fill=tk.X, padx=15)
+        status_frame.pack(fill=tk.X, padx=15, pady=5)
         status_frame.pack_propagate(False)
         
         # 状态指示器
@@ -407,14 +425,20 @@ class MOSDataProcessorV2:
     
     def plot_curve(self, vg, id_raw):
         try:
+            # 清除坐标轴但保持图形设置
             self.ax.clear()
             self._setup_chart_style()
             
+            # 绘制曲线
             self.ax.plot(vg, np.abs(id_raw), color=COLORS['primary'], linewidth=2.5)
             self.ax.set_title('MOS转移特性曲线', fontsize=13, fontweight='bold', pad=15)
             
-            self.fig.tight_layout()
-            self.canvas.draw()
+            # 使用更安全的布局方式
+            self.fig.tight_layout(pad=2.0)
+            
+            # 安全地刷新画布
+            self.canvas.draw_idle()
+            self.canvas.flush_events()
         except Exception as e:
             messagebox.showerror("错误", f"绘图时出错: {e}")
     
